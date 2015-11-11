@@ -28,7 +28,8 @@ var playerSchema = new mongoose.Schema({
   	rushingY : {type : Number},
   	rushingTD : {type : Number},
   	receivingY : {type : Number},
-  	receivingTD : {type : Number}
+  	receivingTD : {type : Number},
+  	fumbles : {type : Number}
 })
 
 playerSchema.plugin(findOrCreate)
@@ -44,6 +45,8 @@ for(var i = 0; i < gamesArray.length; i++){
 	    json: true
 	}, function (error, response, body) {
 
+		
+
 		if(error){
 			console.log("error")
 		}
@@ -51,11 +54,10 @@ for(var i = 0; i < gamesArray.length; i++){
 	    if (!error && response.statusCode === 200) {
 	    		for(each in body){
 
+
 	    			if(typeof body[each] === 'object'){
 
-	    				for(player in body[each].home.stats.passing){
-
-	    					console.log("PLAYER", body[each].home.stats.passing[player])
+	    				for(player in body[each].home.stats.passing){	  					
 
 	    					Player.findOneAndUpdate({id : player}, 
 	    							{	id: player, 
@@ -68,51 +70,121 @@ for(var i = 0; i < gamesArray.length; i++){
 	    						if(err){
 	    							console.log(err)
 	    						}
-	    						else{
-	    							console.log("created or updated")
-	    						}
 	    					})
-
-	    					// Player.update({id : player}, 
-	    					// 	{	id: player, 
-	    					// 		name: body[each].home.stats.passing[player].name, 
-	    					// 		passingY : body[each].home.stats.passing[player].yds, 
-	    					// 		passingTD : body[each].home.stats.passing[player].tds, 
-	    					// 		passingINT : body[each].home.stats.passing[player].ints 
-	    					// 	},
-	    					// 	{upsert : true}
-	    					// 	// function(err, found, created){
-	    					// 	// if(err){
-	    					// 	// 	console.log(err)
-	    					// 	// }
-	    					// )
 	    				}
    				
-	    				for(player in body[each].away.stats.passing){
+	    				for(player in body[each].home.stats.rushing){
 	    					
-	    					Player.update({id : player}, 
-	    						{	id: player, 
-	    							name: body[each].away.stats.passing[player].name, 
-	    							passingY : body[each].away.stats.passing[player].yds, 
-	    							passingTD : body[each].away.stats.passing[player].tds, 
-	    							passingINT : body[each].away.stats.passing[player].ints 
-	    						},
-	    						{upsert : true}
-	    						// function(err, found, created){
-	    						// if(err){
-	    						// 	console.log(err)
-	    						// }
-	    					)
-	    					// Player.findOrCreate({id: player}, 
-	    					// 	({	id: player, name: body[each].away.stats.passing[player].name, 
-	    					// 		passingY : body[each].away.stats.passing[player].yds, 
-	    					// 		passingTD : body[each].away.stats.passing[player].tds, 
-	    					// 		passingINT : body[each].away.stats.passing[player].ints }),
-	    					// 	function(err, found, created){
-	    					// 	if(err){
-	    					// 		console.log(err)
-	    					// 	}
-	    					// })
+	    					Player.findOneAndUpdate({id : player}, 
+	    							{	id: player, 
+	    								name: body[each].home.stats.rushing[player].name, 
+	    								rushingY : body[each].home.stats.rushing[player].yds, 
+	    								rushingTD : body[each].home.stats.rushing[player].tds, 
+	    						}
+	    						,{upsert : true}, function(err, doc){
+	    							if (err) {
+	    								console.log(err)
+	    							}
+	    						})
+	    				}
+
+	    				for(player in body[each].home.stats.receiving){
+	    					
+	    					Player.findOneAndUpdate({id : player}, 
+	    							{	id: player, 
+	    								name: body[each].home.stats.receiving[player].name, 
+	    								receivingY : body[each].home.stats.receiving[player].yds, 
+	    								receivingTD : body[each].home.stats.receiving[player].tds, 
+	    						}
+	    						,{upsert : true}, function(err, doc){
+	    							if (err) {
+	    								console.log(err)
+	    							}
+	    						})
+	    				}
+
+	    				for(player in body[each].home.stats.fumbles){
+
+	    					if(body[each].home.stats.fumbles[player].lost > 0){
+
+		    					Player.findOneAndUpdate({id : player}, 
+		    							{	id: player, 
+		    								name: body[each].home.stats.fumbles[player].name, 
+		    								fumbles : body[each].home.stats.fumbles[player].lost
+		    						}
+		    						, {upsert : true}, function(err, doc){
+		    						if(err){
+		    							console.log(err)
+		    						}
+		    					})
+	    						
+	    					}
+
+	    				}
+
+	    				for(player in body[each].away.stats.passing){
+
+	    					Player.findOneAndUpdate({id : player}, 
+	    							{	id: player, 
+	    								name: body[each].away.stats.passing[player].name, 
+	    								passingY : body[each].away.stats.passing[player].yds, 
+	    								passingTD : body[each].away.stats.passing[player].tds, 
+	    								passingINT : body[each].away.stats.passing[player].ints 
+	    						}
+	    						, {upsert : true}, function(err, doc){
+	    						if(err){
+	    							console.log(err)
+	    						}
+	    					})
+	    				}
+   				
+	    				for(player in body[each].away.stats.rushing){
+	    					
+	    					Player.findOneAndUpdate({id : player}, 
+	    							{	id: player, 
+	    								name: body[each].away.stats.rushing[player].name, 
+	    								rushingY : body[each].away.stats.rushing[player].yds, 
+	    								rushingTD : body[each].away.stats.rushing[player].tds, 
+	    						}
+	    						,{upsert : true}, function(err, doc){
+	    							if (err) {
+	    								console.log(err)
+	    							}
+	    						})
+	    				}
+
+	    				for(player in body[each].away.stats.receiving){
+	    					
+	    					Player.findOneAndUpdate({id : player}, 
+	    							{	id: player, 
+	    								name: body[each].away.stats.receiving[player].name, 
+	    								receivingY : body[each].away.stats.receiving[player].yds, 
+	    								receivingTD : body[each].away.stats.receiving[player].tds, 
+	    						}
+	    						,{upsert : true}, function(err, doc){
+	    							if (err) {
+	    								console.log(err)
+	    							}
+	    						})
+	    				}
+
+	    				for(player in body[each].away.stats.fumbles){
+
+	    					if(body[each].away.stats.fumbles[player].lost > 0){
+
+		    					Player.findOneAndUpdate({id : player}, 
+		    							{	id: player, 
+		    								name: body[each].away.stats.fumbles[player].name, 
+		    								fumbles : body[each].away.stats.fumbles[player].lost
+		    						}
+		    						, {upsert : true}, function(err, doc){
+		    						if(err){
+		    							console.log(err)
+		    						}
+		    					})
+	    						
+	    					}
+
 	    				}
 
 	    			}
@@ -120,93 +192,5 @@ for(var i = 0; i < gamesArray.length; i++){
 	    }
 	})
 }
-
-// setTimeout(function(){
-// 	for(var i = 0; i < gamesArray.length; i++){
-
-// 	var gameUrl = gamesArray[i]
-// 		request({
-// 		    url: gameUrl,
-// 		    json: true
-		
-// 		}, function (error, response, body) {
-
-// 			if(error){
-// 				console.log("error")
-// 			}
-
-// 		    if (!error && response.statusCode === 200) {
-// 		    		for(each in body){
-
-// 		    			if(typeof body[each] === 'object'){
-		    				
-// 		    				for(player in body[each].home.stats.rushing){
-
-// 		    					Player.findOrCreate({id: player}, ({id: player, name: body[each].home.stats.rushing[player].name}), function(err, newPlayer, created){
-// 		    						if(err){
-// 		    							console.log(err)
-// 		    						}
-// 		    					})
-// 		    				}
-// 		    				for(player in body[each].away.stats.rushing){
-		    					
-// 		    					Player.findOrCreate({id: player}, ({id: player, name: body[each].away.stats.rushing[player].name}),function(err, newPlayer, created){
-// 		    						if(err){
-// 		    							console.log(err)
-// 		    						}		    				
-// 		    					})
-// 		    				}
-// 		    			}
-// 		    		}
-// 		    }
-// 		})
-// 	}
-// }, 2500)
-
-// setTimeout(function(){
-// 	for(var i = 0; i < gamesArray.length; i++){
-
-// 	var gameUrl = gamesArray[i]
-// 		request({
-// 		    url: gameUrl,
-// 		    json: true
-		
-// 		}, function (error, response, body) {
-
-// 			if(error){
-// 				console.log("error")
-// 			}
-
-
-// 		    if (!error && response.statusCode === 200) {
-// 		    		for(each in body){
-
-// 		    			if(typeof body[each] === 'object'){
-
-// 		    				for(player in body[each].home.stats.receiving){
-
-// 		    					Player.findOrCreate({id: player}, ({id: player, name: body[each].home.stats.receiving[player].name}), function(err, newPlayer, created){
-// 		    						if(err){
-// 		    							console.log(err)
-// 		    						}
-// 		    					})
-// 		    				}
-// 		    				for(player in body[each].away.stats.receiving){
-		    					
-// 		    					Player.findOrCreate({id: player}, ({id: player, name: body[each].away.stats.receiving[player].name}),function(err, newPlayer, created){
-// 		    						if(err){
-// 		    							console.log(err)
-// 		    						}		    				
-// 		    					})
-// 		    				}
-// 		    			}
-// 		    		}
-// 		    }
-// 		})
-// 	}
-// }, 4000)
-
-
-
 
 mongoose.connect('mongodb://localhost/testNFL');
