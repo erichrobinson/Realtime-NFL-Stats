@@ -29,12 +29,11 @@ app.get('/', function(req, res){
 
 var gameCodes = []
 
-var firstGame = new Date(2015, 8, 10)
+var firstGame = new Date(2015, 10, 12)
 // console.log(firstGame)
 // firstGame = firstGame.addDays(30)
 
 for(var x = 0; x <= 17; x++){
-	console.log(firstGame.getMonth())
 	var month = ''
 	var day = ''
 	if(firstGame.getMonth() < 9){
@@ -79,10 +78,6 @@ for(var x = 0; x <= 17; x++){
 	firstGame = firstGame.addDays(3)
 }
 
-console.log(gameCodes)
-
-
-
 // var gameday = (firstGame.getFullYear().toString() + "0" + (firstGame.getMonth()+1).toString() + firstGame.getDate().toString() + "00")
 // gameday = +gameday
 
@@ -91,16 +86,28 @@ console.log(gameCodes)
 
 // }
 
-for(var y = 0; y < gameCodes.length; i++){
+var weeks = []
+for(var i = 1; i < 18; i++){
+	weeks.push(i)
+}
+
+setInterval(function(){
+	
+
+for(var y = 0; y < gameCodes.length; y++){
+
 
 	var gamesArray = []
 
-	gameCode = gameCodes[i]
+	console.log(gameCodes[y])
+	gameCode = gameCodes[y]
 
 	for(var i = 0; i <= 14; i++){
 		var urlBase = "http://www.nfl.com/liveupdate/game-center/" + gameCode +"/" + gameCode + "_gtd.json"
+		console.log(urlBase)
 		gamesArray.push(urlBase)
-		gameCode += 1
+		gameCode = +gameCode + 1
+		gameCode.toString()
 	}
 
 	var Player = require('./models/players')
@@ -126,128 +133,97 @@ for(var y = 0; y < gameCodes.length; i++){
 
 		    			if(typeof body[each] === 'object'){
 
-		    				for(player in body[each].home.stats.passing){	  					
+		    				// for(player in body[each].home.stats.passing){	  					
 
-		    					Player.findOneAndUpdate({id : player}, 
-		    							{	id: player,
-		    								name: body[each].home.stats.passing[player].name,
-		    								$push: { 'stats' : {
-		    									week : gameCode,
-		    									passingY : body[each].home.stats.passing[player].yds, 
-			    								passingTD : body[each].home.stats.passing[player].tds, 
-			    								passingINT : body[each].home.stats.passing[player].ints
-			    							}},
-		    								}
-		    								// gameCode : {
-			    							// 	passingY : body[each].home.stats.passing[player].yds, 
-			    							// 	passingTD : body[each].home.stats.passing[player].tds, 
-			    							// 	passingINT : body[each].home.stats.passing[player].ints 	    									
-		    								// } 
+		    				// 	Player.findOneAndUpdate({id : player}, 
+		    				// 			{	id: player,
+		    				// 				name: body[each].home.stats.passing[player].name,
+		    				// 				$set: { 
+		    				// 					'stats.passingY' : body[each].home.stats.passing[player].yds, 
+			    			// 					'stats.passingTD' : body[each].home.stats.passing[player].tds, 
+			    			// 					'stats.passingINT' : body[each].home.stats.passing[player].ints
+			    			// 				},
+		    				// 				}
 		    							
-		    						, {upsert : true, safe: true}, function(err, doc){
-		    						if(err){
-		    							console.log(err)
-		    						}
-		    					})
+		    				// 		, {upsert : true, safe: true}, function(err, doc){
+		    				// 		if(err){
+		    				// 			console.log("wtf???")
+		    				// 		}
+		    				// 	})
 
-		    					// Player.findOneAndUpdate({id : player},
-		    					// 			{$push: { 'stats' : {
-		    					// 				week : gameCode,
-		    					// 				passingY : body[each].home.stats.passing[player].yds, 
-			    				// 				passingTD : body[each].home.stats.passing[player].tds, 
-			    				// 				passingINT : body[each].home.stats.passing[player].ints
-			    				// 			}}},
-			    				// 			{safe : true},
-			    				// 			function(err, model){
-			    				// 				if(err){
-			    				// 					console.log(err)
-			    				// 				}
-			    				// 			}
-		    					// 	)
-		    				}
+		    				// }
 		    				
 	   				
-		    				for(player in body[each].home.stats.rushing){
+		    				// for(player in body[each].home.stats.rushing){
 		    					
-		    					Player.findOneAndUpdate({id : player}, 
-		    							{	id: player, 
-		    								name: body[each].home.stats.rushing[player].name, 
-		    								rushingY : body[each].home.stats.rushing[player].yds, 
-		    								rushingTD : body[each].home.stats.rushing[player].tds, 
-		    						}
-		    						,{upsert : true}, function(err, doc){
-		    							if (err) {
-		    								console.log(err)
-		    							}
-		    						})
-		    				}
+		    				// 	Player.findOneAndUpdate({id : player}, 
+		    				// 			{	id: player, 
+		    				// 				name: body[each].home.stats.rushing[player].name, 
+		    				// 				$set: { 'stats' : {
+		    				// 					rushingY : body[each].home.stats.rushing[player].yds, 
+			    			// 					rushingTD : body[each].home.stats.rushing[player].tds, 
+			    			// 				}}, 
+		    				// 		}
+		    				// 		,{upsert : true, safe: true}, function(err, doc){
+		    				// 			if (err) {
+		    				// 				console.log(err)
+		    				// 			}
+		    				// 		})
+		    				// }
 
-		    				for(player in body[each].home.stats.receiving){
+		    				// for(player in body[each].home.stats.receiving){
 		    					
-		    					Player.findOneAndUpdate({id : player}, 
-		    							{	id: player, 
-		    								name: body[each].home.stats.receiving[player].name, 
-		    								receivingY : body[each].home.stats.receiving[player].yds, 
-		    								receivingTD : body[each].home.stats.receiving[player].tds, 
-		    						}
-		    						,{upsert : true}, function(err, doc){
-		    							if (err) {
-		    								console.log(err)
-		    							}
-		    						})
-		    				}
+		    				// 	Player.findOneAndUpdate({id : player}, 
+		    				// 			{	id: player, 
+		    				// 				name: body[each].home.stats.receiving[player].name, 
+		    				// 				$set: { 'stats' : {
+		    				// 					receivingY : body[each].home.stats.receiving[player].yds, 
+			    			// 					receivingTD : body[each].home.stats.receiving[player].tds, 
+			    			// 				}}, 
+		    				// 		}
+		    				// 		,{upsert : true, safe:true}, function(err, doc){
+		    				// 			if (err) {
+		    				// 				console.log(err)
+		    				// 			}
+		    				// 		})
+		    				// }
 
-		    				for(player in body[each].home.stats.fumbles){
+		    				// for(player in body[each].home.stats.fumbles){
 
-		    					if(body[each].home.stats.fumbles[player].lost > 0){
+		    				// 	if(body[each].home.stats.fumbles[player].lost > 0){
 
-			    					Player.findOneAndUpdate({id : player}, 
-			    							{	id: player, 
-			    								name: body[each].home.stats.fumbles[player].name, 
-			    								fumbles : body[each].home.stats.fumbles[player].lost
-			    						}
-			    						, {upsert : true}, function(err, doc){
-			    						if(err){
-			    							console.log(err)
-			    						}
-			    					})
+			    			// 		Player.findOneAndUpdate({id : player}, 
+			    			// 				{	id: player, 
+			    			// 					name: body[each].home.stats.fumbles[player].name, 
+			    			// 					fumbles : body[each].home.stats.fumbles[player].lost
+			    			// 			}
+			    			// 			, {upsert : true}, function(err, doc){
+			    			// 			if(err){
+			    			// 				console.log(err)
+			    			// 			}
+			    			// 		})
 		    						
-		    					}
+		    				// 	}
 
-		    				}
+		    				// }
 
 		    				for(player in body[each].away.stats.passing){
 
 		    					Player.findOneAndUpdate({id : player}, 
 		    							{	id: player,
 		    								name: body[each].away.stats.passing[player].name,
-		    								$push: { 'stats' : {
-		    									week : gameCode,
-		    									passingY : body[each].away.stats.passing[player].yds, 
-			    								passingTD : body[each].away.stats.passing[player].tds, 
-			    								passingINT : body[each].away.stats.passing[player].ints
-			    							}},
+		    								$set: { 
+		    									'stats.passingY' : body[each].away.stats.passing[player].yds, 
+			    								'stats.passingTD' : body[each].away.stats.passing[player].tds, 
+			    								'stats.passingINT' : body[each].away.stats.passing[player].ints
+			    							},
 		    							}
 		    						, {upsert : true}, function(err, doc){
 		    						if(err){
-		    							console.log(err)
+		    							console.log("away passing", err)
 		    						}
 		    					})
 
-		    					// Player.findOneAndUpdate({id : player},
-		    					// 			{$push: { 'stats' : {
-		    					// 				week : gameCode,
-		    					// 				passingY : body[each].away.stats.passing[player].yds, 
-			    				// 				passingTD : body[each].away.stats.passing[player].tds, 
-			    				// 				passingINT : body[each].away.stats.passing[player].ints
-			    				// 			}}},
-			    				// 			{safe : true},
-			    				// 			function(err, model){
-			    				// 				if(err){
-			    				// 					console.log(err)
-			    				// 				}
-			    				// 			}
-		    					// 	)
 		    				}
 	   				
 		    				for(player in body[each].away.stats.rushing){
@@ -255,49 +231,53 @@ for(var y = 0; y < gameCodes.length; i++){
 		    					Player.findOneAndUpdate({id : player}, 
 		    							{	id: player, 
 		    								name: body[each].away.stats.rushing[player].name, 
-		    								rushingY : body[each].away.stats.rushing[player].yds, 
-		    								rushingTD : body[each].away.stats.rushing[player].tds, 
+		    								$set: { 'stats' : {
+		    									rushingY : body[each].away.stats.rushing[player].yds, 
+			    								rushingTD : body[each].away.stats.rushing[player].tds, 
+			    							}},
 		    						}
-		    						,{upsert : true}, function(err, doc){
+		    						,{upsert : true, safe: true}, function(err, doc){
 		    							if (err) {
 		    								console.log(err)
 		    							}
 		    						})
 		    				}
 
-		    				for(player in body[each].away.stats.receiving){
+		    				// for(player in body[each].away.stats.receiving){
 		    					
-		    					Player.findOneAndUpdate({id : player}, 
-		    							{	id: player, 
-		    								name: body[each].away.stats.receiving[player].name, 
-		    								receivingY : body[each].away.stats.receiving[player].yds, 
-		    								receivingTD : body[each].away.stats.receiving[player].tds, 
-		    						}
-		    						,{upsert : true}, function(err, doc){
-		    							if (err) {
-		    								console.log(err)
-		    							}
-		    						})
-		    				}
+		    				// 	Player.findOneAndUpdate({id : player}, 
+		    				// 			{	id: player, 
+		    				// 				name: body[each].away.stats.receiving[player].name, 
+		    				// 				$set: { 'stats' : {
+		    				// 					receivingY : body[each].away.stats.receiving[player].yds, 
+			    			// 					receivingTD : body[each].away.stats.receiving[player].tds, 
+			    			// 				}},
+		    				// 		}
+		    				// 		,{upsert : true, safe: true}, function(err, doc){
+		    				// 			if (err) {
+		    				// 				console.log(err)
+		    				// 			}
+		    				// 		})
+		    				// }
 
-		    				for(player in body[each].away.stats.fumbles){
+		    				// for(player in body[each].away.stats.fumbles){
 
-		    					if(body[each].away.stats.fumbles[player].lost > 0){
+		    				// 	if(body[each].away.stats.fumbles[player].lost > 0){
 
-			    					Player.findOneAndUpdate({id : player}, 
-			    							{	id: player, 
-			    								name: body[each].away.stats.fumbles[player].name, 
-			    								fumbles : body[each].away.stats.fumbles[player].lost
-			    						}
-			    						, {upsert : true}, function(err, doc){
-			    						if(err){
-			    							console.log(err)
-			    						}
-			    					})
+			    			// 		Player.findOneAndUpdate({id : player}, 
+			    			// 				{	id: player, 
+			    			// 					name: body[each].away.stats.fumbles[player].name, 
+			    			// 					fumbles : body[each].away.stats.fumbles[player].lost
+			    			// 			}
+			    			// 			, {upsert : true}, function(err, doc){
+			    			// 			if(err){
+			    			// 				console.log(err)
+			    			// 			}
+			    			// 		})
 		    						
-		    					}
+		    				// 	}
 
-		    				}
+		    				// }
 
 		    			}
 		    		}		   
@@ -305,9 +285,11 @@ for(var y = 0; y < gameCodes.length; i++){
 		})
 	}
 }
+console.log("testing")
 
+}, 30000)
 app.get('/getPlayers', function(req, res){
-	Player.find( {passingY : {$gt : 100}}, function(err, doc){
+	Player.find({name : 'T.Taylor'}, function(err, doc){
 		if(err){console.log(err)}
 		else{
 			res.send(doc)

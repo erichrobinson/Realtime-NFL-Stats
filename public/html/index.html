@@ -5,11 +5,11 @@
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.5/angular.min.js"></script>
 </head>
 <body ng-controller="mainController">
-	{{testing}}
 	<div ng-repeat="player in allPlayers">
 		<div ng-repeat="each in player">
 			<p>{{each.name}}</p>
-			<p>{{each.id}}</P>
+			<p>{{each.stats}}</p>
+
 		</div>
 		<!-- <h1>{{player}}</h1> -->
 	</div>
