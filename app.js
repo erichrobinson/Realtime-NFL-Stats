@@ -1,11 +1,23 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
+var express = require('express')
+var bodyParser = require('body-parser')
 var request = require('request')
-var findOrCreate = require('mongoose-findorcreate')
+// var findOrCreate = require('mongoose-findorcreate')
 var db = mongoose.connection;
 // var Promise = require('bluebird')
-var async = require('async')
+// var async = require('async')
 
 db.on('error', console.error);
+
+var app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(__dirname + '/public'));
+
+app.get('/', function(req, res){
+  res.sendFile('/html/index.html', {root : './public'})
+});
 
 var date = new Date()
 
@@ -13,28 +25,13 @@ var gameCode = 2015110100
 
 var gamesArray = []
 
-for(var i = 0; i <= 11; i++){
-	gameCode += 1
+for(var i = 0; i <= 14; i++){
 	var urlBase = "http://www.nfl.com/liveupdate/game-center/" + gameCode +"/" + gameCode + "_gtd.json"
 	gamesArray.push(urlBase)
+	gameCode += 1
 }
 
-var playerSchema = new mongoose.Schema({
-  	id : {type : String},
-  	name : {type: String},
-  	passingY : {type : Number},
-  	passingTD : {type : Number},
-  	passingINT : {type : Number},
-  	rushingY : {type : Number},
-  	rushingTD : {type : Number},
-  	receivingY : {type : Number},
-  	receivingTD : {type : Number},
-  	fumbles : {type : Number}
-})
-
-playerSchema.plugin(findOrCreate)
-
-var Player = mongoose.model('Player', playerSchema);
+var Player = require('./models/players')
 
 for(var i = 0; i < gamesArray.length; i++){
 
@@ -60,18 +57,37 @@ for(var i = 0; i < gamesArray.length; i++){
 	    				for(player in body[each].home.stats.passing){	  					
 
 	    					Player.findOneAndUpdate({id : player}, 
-	    							{	id: player, 
-	    								name: body[each].home.stats.passing[player].name, 
-	    								passingY : body[each].home.stats.passing[player].yds, 
-	    								passingTD : body[each].home.stats.passing[player].tds, 
-	    								passingINT : body[each].home.stats.passing[player].ints 
-	    						}
+	    							{	id: player,
+	    								name: body[each].home.stats.passing[player].name,
+	    								}
+	    								// gameCode : {
+		    							// 	passingY : body[each].home.stats.passing[player].yds, 
+		    							// 	passingTD : body[each].home.stats.passing[player].tds, 
+		    							// 	passingINT : body[each].home.stats.passing[player].ints 	    									
+	    								// } 
+	    							
 	    						, {upsert : true}, function(err, doc){
 	    						if(err){
 	    							console.log(err)
 	    						}
 	    					})
+
+	    					Player.findOneAndUpdate({id : player},
+	    								{$push: { 'stats' : {
+	    									week : gameCode,
+	    									passingY : body[each].home.stats.passing[player].yds, 
+		    								passingTD : body[each].home.stats.passing[player].tds, 
+		    								passingINT : body[each].home.stats.passing[player].ints
+		    							}}},
+		    							{safe : true},
+		    							function(err, model){
+		    								if(err){
+		    									console.log(err)
+		    								}
+		    							}
+	    						)
 	    				}
+	    				
    				
 	    				for(player in body[each].home.stats.rushing){
 	    					
@@ -125,17 +141,32 @@ for(var i = 0; i < gamesArray.length; i++){
 	    				for(player in body[each].away.stats.passing){
 
 	    					Player.findOneAndUpdate({id : player}, 
-	    							{	id: player, 
-	    								name: body[each].away.stats.passing[player].name, 
-	    								passingY : body[each].away.stats.passing[player].yds, 
-	    								passingTD : body[each].away.stats.passing[player].tds, 
-	    								passingINT : body[each].away.stats.passing[player].ints 
-	    						}
+	    							{	id: player,
+	    								name: body[each].away.stats.passing[player].name,
+	    								// passingY : body[each].away.stats.passing[player].yds, 
+	    								// passingTD : body[each].away.stats.passing[player].tds, 
+	    								// passingINT : body[each].away.stats.passing[player].ints 	    									 
+	    							}
 	    						, {upsert : true}, function(err, doc){
 	    						if(err){
 	    							console.log(err)
 	    						}
 	    					})
+
+	    					Player.findOneAndUpdate({id : player},
+	    								{$push: { 'stats' : {
+	    									week : gameCode,
+	    									passingY : body[each].away.stats.passing[player].yds, 
+		    								passingTD : body[each].away.stats.passing[player].tds, 
+		    								passingINT : body[each].away.stats.passing[player].ints
+		    							}}},
+		    							{safe : true},
+		    							function(err, model){
+		    								if(err){
+		    									console.log(err)
+		    								}
+		    							}
+	    						)
 	    				}
    				
 	    				for(player in body[each].away.stats.rushing){
@@ -193,4 +224,19 @@ for(var i = 0; i < gamesArray.length; i++){
 	})
 }
 
+app.get('/getPlayers', function(req, res){
+	Player.find( {passingY : {$gt : 100}}, function(err, doc){
+		if(err){console.log(err)}
+		else{
+			res.send(doc)
+		}
+	})
+})
+
 mongoose.connect('mongodb://localhost/testNFL');
+
+var port = 3000
+app.listen(port, function(){
+  console.log('Server running on port ' + port);
+
+});
