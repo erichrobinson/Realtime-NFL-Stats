@@ -297,7 +297,7 @@ for(var y = 0; y < gameCodes.length; y++){
 }
 console.log("testing")
 
-}, 5000)
+}, 30000)
 
 app.get('/getPlayers', function(req, res){
 	Player.find({}, function(err, doc){
