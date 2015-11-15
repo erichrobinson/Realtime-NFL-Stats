@@ -22,9 +22,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
+var Player = require('./models/players')
+
+var User = require('./models/users')
+
 app.get('/', function(req, res){
   res.sendFile('/html/index.html', {root : './public'})
 });
+
+app.post('/createUser', function(req, res){
+	console.log(req.body)
+	res.send()
+})
 
 
 var gameCodes = []
@@ -110,7 +119,6 @@ for(var y = 0; y < gameCodes.length; y++){
 		gameCode.toString()
 	}
 
-	var Player = require('./models/players')
 
 	for(var i = 0; i < gamesArray.length; i++){
 
@@ -121,15 +129,14 @@ for(var y = 0; y < gameCodes.length; y++){
 		    json: true
 		}, function (error, response, body) {
 
-			
-
 			if(error){
-				console.log("error")
+				console.log(" request error")
 			}
 
 		    if (!error && response.statusCode === 200) {
 		    		for(each in body){
 
+		    			console.log(body)
 
 		    			if(typeof body[each] === 'object'){
 
@@ -212,7 +219,8 @@ for(var y = 0; y < gameCodes.length; y++){
 		    					Player.findOneAndUpdate({id : player}, 
 		    							{	id: player,
 		    								name: body[each].away.stats.passing[player].name,
-		    								$set: { 
+		    								$set: {
+		    									'team' : body[each].away.abbr, 
 		    									'stats.passingY' : body[each].away.stats.passing[player].yds, 
 			    								'stats.passingTD' : body[each].away.stats.passing[player].tds, 
 			    								'stats.passingINT' : body[each].away.stats.passing[player].ints
@@ -220,7 +228,7 @@ for(var y = 0; y < gameCodes.length; y++){
 		    							}
 		    						, {upsert : true}, function(err, doc){
 		    						if(err){
-		    							console.log("away passing", err)
+		    							console.log("away passing ", err)
 		    						}
 		    					})
 
@@ -231,34 +239,36 @@ for(var y = 0; y < gameCodes.length; y++){
 		    					Player.findOneAndUpdate({id : player}, 
 		    							{	id: player, 
 		    								name: body[each].away.stats.rushing[player].name, 
-		    								$set: { 'stats' : {
-		    									rushingY : body[each].away.stats.rushing[player].yds, 
-			    								rushingTD : body[each].away.stats.rushing[player].tds, 
-			    							}},
+		    								$set: {
+		    									'team' : body[each].away.abbr, 
+		    									'stats.rushingY': body[each].away.stats.rushing[player].yds, 
+			    								'stats.rushingTD' : body[each].away.stats.rushing[player].tds, 
+			    							},
 		    						}
 		    						,{upsert : true, safe: true}, function(err, doc){
 		    							if (err) {
-		    								console.log(err)
+		    								console.log("away rushing ", err)
 		    							}
 		    						})
 		    				}
 
-		    				// for(player in body[each].away.stats.receiving){
+		    				for(player in body[each].away.stats.receiving){
 		    					
-		    				// 	Player.findOneAndUpdate({id : player}, 
-		    				// 			{	id: player, 
-		    				// 				name: body[each].away.stats.receiving[player].name, 
-		    				// 				$set: { 'stats' : {
-		    				// 					receivingY : body[each].away.stats.receiving[player].yds, 
-			    			// 					receivingTD : body[each].away.stats.receiving[player].tds, 
-			    			// 				}},
-		    				// 		}
-		    				// 		,{upsert : true, safe: true}, function(err, doc){
-		    				// 			if (err) {
-		    				// 				console.log(err)
-		    				// 			}
-		    				// 		})
-		    				// }
+		    					Player.findOneAndUpdate({id : player}, 
+		    							{	id: player, 
+		    								name: body[each].away.stats.receiving[player].name, 
+		    								$set: { 
+		    									'team' : body[each].away.abbr, 
+		    									'stats.receivingY' : body[each].away.stats.receiving[player].yds, 
+			    								'stats.receivingTD' : body[each].away.stats.receiving[player].tds, 
+			    							},
+		    						}
+		    						,{upsert : true, safe: true}, function(err, doc){
+		    							if (err) {
+		    								console.log("away receiving", err)
+		    							}
+		    						})
+		    				}
 
 		    				// for(player in body[each].away.stats.fumbles){
 
@@ -287,14 +297,20 @@ for(var y = 0; y < gameCodes.length; y++){
 }
 console.log("testing")
 
-}, 30000)
+}, 5000)
+
 app.get('/getPlayers', function(req, res){
-	Player.find({name : 'T.Taylor'}, function(err, doc){
-		if(err){console.log(err)}
+	Player.find({}, function(err, doc){
+		if(err){res.send(err)}
 		else{
 			res.send(doc)
 		}
 	})
+})
+
+app.get('/test', function(req, res){
+	console.log("test")
+	res.send("123456")
 })
 
 mongoose.connect('mongodb://localhost/testNFL');

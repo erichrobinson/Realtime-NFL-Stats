@@ -12,7 +12,8 @@ var playerSchema = new mongoose.Schema({
   	receivingY : {type : Number},
   	receivingTD : {type : Number},
   	fumbles : {type : Number},
-    stats : {type : Array}
+    stats : {type : Array},
+    team : {type : String}
 })
 
 var Player = mongoose.model('player', playerSchema)

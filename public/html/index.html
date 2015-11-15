@@ -4,10 +4,20 @@
 	<title></title>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.5/angular.min.js"></script>
 </head>
+<button ng-click="getPlayers()">Refresh</button>
+{{testing}}
 <body ng-controller="mainController">
+	<form>
+		<input ng-model="user.name">
+		<input ng-model="user.team">
+		<input ng-submit="createUser()">
+	</form>
 	<div ng-repeat="player in allPlayers">
+		<!-- {{player}} -->
 		<div ng-repeat="each in player">
 			<p>{{each.name}}</p>
+			team
+			<div>{{each.team}}</div>
 			<p>{{each.stats}}</p>
 
 		</div>
