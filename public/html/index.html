@@ -7,14 +7,10 @@
 <button ng-click="getPlayers()">Refresh</button>
 {{testing}}
 <body ng-controller="mainController">
-	<form>
-		<input ng-model="user.name">
-		<input ng-model="user.team">
-		<input ng-submit="createUser()">
-	</form>
+	<input ng-model="teamFilter">
 	<div ng-repeat="player in allPlayers">
 		<!-- {{player}} -->
-		<div ng-repeat="each in player">
+		<div ng-repeat="each in player | filter : teamFilter">
 			<p>{{each.name}}</p>
 			team
 			<div>{{each.team}}</div>
