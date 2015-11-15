@@ -38,7 +38,7 @@ app.post('/createUser', function(req, res){
 
 var gameCodes = []
 
-var firstGame = new Date(2015, 10, 12)
+var firstGame = new Date(2015, 10, 15)
 // console.log(firstGame)
 // firstGame = firstGame.addDays(30)
 
